@@ -1,4 +1,5 @@
 import os
+import requests
 from datetime import datetime, timedelta
 from flask import Flask, request
 from pyrogram import Client, filters
@@ -81,9 +82,17 @@ def webhook():
     return "OK"
 
 if __name__ == "__main__":
-    # Iniciar bot y configurar webhook
+    # Iniciar bot
     app_bot.start()
-    app_bot.set_webhook(url=f"{Config.WEBHOOK_URL}/{Config.BOT_TOKEN}")
 
+    # Registrar webhook en Telegram usando la API HTTP
+    webhook_url = f"{Config.WEBHOOK_URL}/{Config.BOT_TOKEN}"
+    r = requests.get(
+        f"https://api.telegram.org/bot{Config.BOT_TOKEN}/setWebhook",
+        params={"url": webhook_url}
+    )
+    print("Webhook set:", r.json())
+
+    # Iniciar servidor Flask
     port = int(os.environ.get("PORT", 5000))
     app_web.run(host="0.0.0.0", port=port)
